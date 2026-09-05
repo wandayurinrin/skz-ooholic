@@ -1,0 +1,539 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>skz-ooholic 迷妹即時神諭所</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        skz: {
+                            bg: '#FBF9F5',
+                            card: '#FFFDF9',
+                            primary: '#C88A58',
+                            secondary: '#FBD96D',
+                            pink: '#F08AB3',
+                            text: '#5C4B43',
+                            muted: '#A68A78',
+                            border: '#EADBC8'
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 16px -4px rgba(184, 134, 93, 0.1)',
+                        'btn': '0 3px 10px rgba(184, 134, 93, 0.12)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FBF9F5;
+            background-image: 
+                radial-gradient(#EADBC8 0.7px, transparent 0.7px), 
+                radial-gradient(#F3D5C0 0.7px, #FBF9F5 0.7px);
+            background-size: 28px 28px;
+            background-position: 0 0, 14px 14px;
+            color: #5C4B43;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .soft-card {
+            background: rgba(255, 253, 250, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(184, 134, 93, 0.2);
+            box-shadow: 0 6px 20px -4px rgba(184, 134, 93, 0.08);
+            border-radius: 16px;
+        }
+
+        .soft-btn {
+            transition: all 0.15s ease;
+            box-shadow: 0 3px 10px rgba(184, 134, 93, 0.12);
+        }
+        .soft-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(184, 134, 93, 0.18);
+        }
+        .soft-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 4px rgba(184, 134, 93, 0.1);
+        }
+
+        .soft-input {
+            background: #FFF;
+            border: 1.5px solid #E6D5C3;
+            border-radius: 10px;
+            padding: 7px 10px;
+            outline: none;
+            transition: all 0.2s;
+            color: #5C4B43;
+            font-size: 12px;
+        }
+        .soft-input:focus {
+            border-color: #C88A58;
+            box-shadow: 0 0 0 2px rgba(200, 138, 88, 0.15);
+        }
+
+        .tab-indicator {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        .animate-float-slow {
+            animation: floatSlow 2.5s ease-in-out infinite;
+        }
+
+        .loader {
+            border: 2px solid #EADBC8;
+            border-top: 2px solid #C88A58;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-8 flex flex-col items-center text-xs">
+
+    <header class="w-full max-w-md bg-white/90 backdrop-blur-md border-b border-skz-border py-2 px-3.5 sticky top-0 z-50 flex items-center justify-between shadow-xs">
+        <div class="flex items-center space-x-1.5">
+            <span class="bg-skz-pink text-white text-[10px] px-2 py-0.5 rounded-full font-bold">SKZ·SKZOO</span>
+            <h1 class="text-xs font-black tracking-wider text-skz-text">skz-ooholic</h1>
+        </div>
+        <div class="text-[10px] text-skz-muted font-medium bg-skz-bg px-2 py-0.5 rounded-full border border-skz-border">
+            ♡ 迷妹心靈神諭所
+        </div>
+    </header>
+
+    <main class="w-full max-w-md px-3.5 mt-2.5 flex-1 flex flex-col space-y-2.5">
+
+        <!-- Crayon Art Banner (User can click to upload their own crayon image) -->
+        <div class="soft-card overflow-hidden relative shadow-soft cursor-pointer group" onclick="document.getElementById('header-banner-file').click()" title="點擊上傳你的蠟筆圖">
+            <div class="relative h-40 w-full bg-[#FAF3E3] overflow-hidden flex items-center justify-center border-b border-skz-border">
+                <img id="banner-img" src="" class="w-full h-full object-cover hidden" alt="我的蠟筆圖">
+                <div id="banner-placeholder" class="flex flex-col items-center justify-center space-y-1 text-skz-primary p-4 text-center">
+                    <i class="fa-solid fa-image text-2xl mb-0.5"></i>
+                    <span class="font-bold text-xs">點擊此處上傳你的 SKZOO 蠟筆圖</span>
+                    <span class="text-[10px] text-skz-muted font-normal">上傳後將直接作為程式主題封面</span>
+                </div>
+                <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-bold text-xs bg-black/20">
+                    更換圖片
+                </div>
+            </div>
+            <input type="file" id="header-banner-file" accept="image/*" class="hidden" onchange="previewBannerImage(event)">
+        </div>
+
+        <div class="relative bg-skz-border/70 p-0.5 rounded-xl flex items-center justify-between shadow-inner">
+            <div id="active-tab-bg" class="absolute top-0.5 bottom-0.5 w-[18%] bg-white rounded-lg shadow-xs tab-indicator"></div>
+
+            <button onclick="switchTab('buy')" id="btn-buy" class="tab-btn relative z-10 flex-1 py-1.5 font-bold text-skz-text flex flex-col items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-bag-shopping mb-0.5 text-[11px] text-skz-primary"></i>
+                <span class="text-[10px]">剁手</span>
+            </button>
+            <button onclick="switchTab('gamble')" id="btn-gamble" class="tab-btn relative z-10 flex-1 py-1.5 font-bold text-skz-muted flex flex-col items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-dice mb-0.5 text-[11px] text-skz-pink"></i>
+                <span class="text-[10px]">盲盒</span>
+            </button>
+            <button onclick="switchTab('sign')" id="btn-sign" class="tab-btn relative z-10 flex-1 py-1.5 font-bold text-skz-muted flex flex-col items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-signs-post mb-0.5 text-[11px] text-amber-600"></i>
+                <span class="text-[10px]">飯撒</span>
+            </button>
+            <button onclick="switchTab('delulu')" id="btn-delulu" class="tab-btn relative z-10 flex-1 py-1.5 font-bold text-skz-muted flex flex-col items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-wand-magic-sparkles mb-0.5 text-[11px] text-pink-500"></i>
+                <span class="text-[10px]">夢女</span>
+            </button>
+            <button onclick="switchTab('toolkit')" id="btn-toolkit" class="tab-btn relative z-10 flex-1 py-1.5 font-bold text-skz-muted flex flex-col items-center justify-center cursor-pointer">
+                <i class="fa-solid fa-toolbox mb-0.5 text-[11px] text-blue-500"></i>
+                <span class="text-[10px]">生存</span>
+            </button>
+        </div>
+
+        <!-- 1. Buy Decision Section -->
+        <div id="section-buy" class="tab-section soft-card p-3 space-y-2">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1">
+                <h2 class="font-bold text-skz-text flex items-center gap-1.5">
+                    <i class="fa-solid fa-scale-balanced text-skz-primary"></i> 買不買週邊決定器
+                </h2>
+                <span class="text-[10px] text-skz-muted">即時 AI 分析</span>
+            </div>
+
+            <div class="space-y-2">
+                <div onclick="document.getElementById('buy-file').click()" class="border-2 border-dashed border-[#E6D5C3] hover:border-skz-primary bg-white/60 rounded-xl p-2 text-center cursor-pointer transition relative overflow-hidden h-14 flex items-center justify-center">
+                    <div id="upload-placeholder" class="flex items-center space-x-1.5 text-skz-muted">
+                        <i class="fa-solid fa-cloud-arrow-up text-xs text-skz-primary"></i>
+                        <span class="font-medium text-[11px]">上傳週邊截圖 (選填)</span>
+                    </div>
+                    <img id="buy-preview" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl" alt="預覽">
+                    <input type="file" id="buy-file" accept="image/*" class="hidden" onchange="previewBuyImage(event)">
+                </div>
+
+                <div>
+                    <label class="block font-medium mb-0.5 text-skz-muted">週邊名稱：</label>
+                    <input type="text" id="buy-item" placeholder="例如：SKZOO 絨毛吊飾、小卡..." class="soft-input w-full">
+                </div>
+                <div>
+                    <label class="block font-medium mb-0.5 text-skz-muted">價格 (NTD)：</label>
+                    <input type="number" id="buy-price" placeholder="例如：1280" class="soft-input w-full">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-0.5">
+                <button onclick="callGeminiBuy(true)" class="soft-btn bg-white border border-skz-primary/40 text-skz-primary py-2 font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-brain"></i> 理性分析
+                </button>
+                <button onclick="callGeminiBuy(false)" class="soft-btn bg-skz-pink text-white py-2 font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-dice"></i> 命運決定
+                </button>
+            </div>
+
+            <div id="buy-result" class="hidden mt-1.5 p-2.5 bg-white/90 border border-skz-primary/20 rounded-xl space-y-1 shadow-xs"></div>
+        </div>
+
+        <!-- 2. Gamble / Bwa-bei Section -->
+        <div id="section-gamble" class="tab-section soft-card p-3 space-y-2 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1">
+                <h2 class="font-bold text-skz-text flex items-center gap-1.5">
+                    <i class="fa-solid fa-dice-five text-skz-pink"></i> SKZOO 盲盒擲筊神殿
+                </h2>
+                <span class="text-[10px] text-skz-muted">即時神明指示</span>
+            </div>
+
+            <p class="text-[11px] text-skz-muted">拆卡包或買盲盒前，向守護神誠心擲筊問吉凶！</p>
+            
+            <div class="space-y-1">
+                <label class="block font-medium text-skz-muted">你想問的問題：</label>
+                <input type="text" id="gamble-q" placeholder="例如：這盒盲盒能抽中本命嗎？" class="soft-input w-full">
+            </div>
+
+            <div class="text-center py-1 bg-white/50 rounded-xl p-2 border border-skz-border">
+                <div id="divine-box" class="text-2xl mb-1 animate-float-slow">🪵🏺🪵</div>
+                <button onclick="callGeminiGamble()" class="soft-btn bg-skz-secondary text-skz-text px-3.5 py-1.5 font-bold rounded-xl cursor-pointer inline-flex items-center gap-1 shadow-xs">
+                    <i class="fa-solid fa-hand-holding-heart"></i> 誠心擲筊求神
+                </button>
+            </div>
+
+            <div id="gamble-result" class="hidden p-2.5 bg-white/90 border border-skz-pink/30 rounded-xl space-y-1 text-center shadow-xs"></div>
+        </div>
+
+        <!-- 3. Fan Sign Slogan Generator -->
+        <div id="section-sign" class="tab-section soft-card p-3 space-y-2 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1">
+                <h2 class="font-bold text-skz-text flex items-center gap-1.5">
+                    <i class="fa-solid fa-signs-post text-amber-600"></i> 演唱會飯撒應援金句
+                </h2>
+                <span class="text-[10px] text-skz-muted">AI 創意生成</span>
+            </div>
+
+            <div class="flex gap-2">
+                <select id="sign-member" class="soft-input flex-1">
+                    <option value="全體">全體成員 (SKZ)</option>
+                    <option value="方燦">方燦 (Bang Chan)</option>
+                    <option value="李知道">李知道 (Lee Know)</option>
+                    <option value="彰彬">彰彬 (Changbin)</option>
+                    <option value="鉉辰">鉉辰 (Hyunjin)</option>
+                    <option value="HAN">HAN (知城)</option>
+                    <option value="Felix">Felix (容馥)</option>
+                    <option value="昇玟">昇玟 (Seungmin)</option>
+                    <option value="I.N">I.N (精寅)</option>
+                </select>
+                <button onclick="callGeminiSign()" class="soft-btn bg-skz-primary text-white px-3 py-1.5 font-bold rounded-xl cursor-pointer">
+                    靈感生成
+                </button>
+            </div>
+
+            <div id="sign-display" class="p-3 bg-[#2C2421] text-skz-secondary font-bold text-center rounded-xl border border-skz-primary/30 min-h-[70px] flex items-center justify-center shadow-inner tracking-wide leading-relaxed">
+                點擊上方按鈕，即時產出專屬應援金句！
+            </div>
+            <p class="text-[10px] text-center text-skz-muted">💡 提示：字體放大、對比鮮明，歐巴秒看見你！</p>
+        </div>
+
+        <!-- 4. Delulu Generator -->
+        <div id="section-delulu" class="tab-section soft-card p-3 space-y-2 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1">
+                <h2 class="font-bold text-skz-text flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles text-pink-500"></i> 夢女心動小劇場產生器
+                </h2>
+                <span class="text-[10px] text-skz-muted">即時情話</span>
+            </div>
+
+            <div class="space-y-2">
+                <div>
+                    <label class="block font-medium mb-0.5 text-skz-muted">指定本命：</label>
+                    <select id="delulu-member" class="soft-input w-full">
+                        <option value="方燦">方燦 (溫柔狼隊長)</option>
+                        <option value="李知道">李知道 (傲嬌貓咪)</option>
+                        <option value="彰彬">彰彬 (可愛大力士)</option>
+                        <option value="鉉辰">鉉辰 (藝術家男友)</option>
+                        <option value="HAN">HAN (天才小倉鼠)</option>
+                        <option value="Felix">Felix (低音大男孩)</option>
+                        <option value="昇玟">昇玟 (深情狗狗)</option>
+                        <option value="I.N">I.N (可愛小狐狸)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-medium mb-0.5 text-skz-muted">互動情境：</label>
+                    <input type="text" id="delulu-scenario" placeholder="例如：演唱會對視、後台摸頭、深夜通話..." class="soft-input w-full">
+                </div>
+            </div>
+
+            <button onclick="callGeminiDelulu()" class="soft-btn bg-skz-pink text-white w-full py-2 font-bold rounded-xl cursor-pointer shadow-xs">
+                <i class="fa-solid fa-heart"></i> 生成今日心動暴擊
+            </button>
+
+            <div id="delulu-result" class="hidden p-2.5 bg-white/90 border border-skz-pink/30 rounded-xl space-y-1 shadow-xs"></div>
+        </div>
+
+        <!-- 5. Survival Toolkit & Daily Quote -->
+        <div id="section-toolkit" class="tab-section soft-card p-3 space-y-2 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1">
+                <h2 class="font-bold text-skz-text flex items-center gap-1.5">
+                    <i class="fa-solid fa-toolbox text-blue-500"></i> 迷妹看演唱會生存檢查清單
+                </h2>
+                <span class="text-[10px] text-skz-muted">出門自我檢核</span>
+            </div>
+            
+            <div class="space-y-1.5 bg-white/70 p-2.5 rounded-xl border border-skz-border">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" class="w-3.5 h-3.5 accent-skz-primary">
+                    <span class="font-medium text-skz-text">手燈 (Nachimbong) 電池換新並測試藍牙連線？</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" class="w-3.5 h-3.5 accent-skz-primary">
+                    <span class="font-medium text-skz-text">門票、身分證、悠遊卡、錢包帶了沒？</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" class="w-3.5 h-3.5 accent-skz-primary">
+                    <span class="font-medium text-skz-text">應援手幅、小卡保護套準備好了？</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" class="w-3.5 h-3.5 accent-skz-primary">
+                    <span class="font-medium text-skz-text">喉糖與應援口號練習完了？</span>
+                </label>
+            </div>
+
+            <div class="p-2 bg-[#F7F1E5] border border-skz-border rounded-xl text-center">
+                <div class="font-bold mb-0.5 text-skz-primary">🔥 迷妹每日金句</div>
+                <p id="daily-quote" class="text-[11px] text-skz-muted">載入中...</p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="w-full text-center mt-3 text-[10px] text-skz-muted">
+        <p>skz-ooholic v3.3 ♡ Real-time AI for Stay</p>
+    </footer>
+
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.replace('text-skz-text', 'text-skz-muted'));
+            
+            document.getElementById('section-' + tabId).classList.remove('hidden');
+            
+            const tabs = ['buy', 'gamble', 'sign', 'delulu', 'toolkit'];
+            const index = tabs.indexOf(tabId);
+            const indicator = document.getElementById('active-tab-bg');
+            indicator.style.left = `calc(${index * 20}% + 2px)`;
+            indicator.style.width = `calc(20% - 4px)`;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            switchTab('buy');
+            loadDailyQuote();
+        });
+
+        // Banner Image Uploader for User's Custom Crayon Art
+        function previewBannerImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const bannerImg = document.getElementById('banner-img');
+                    bannerImg.src = e.target.result;
+                    bannerImg.classList.add('block');
+                    bannerImg.classList.remove('hidden');
+                    document.getElementById('banner-placeholder').classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewBuyImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('buy-preview');
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    document.getElementById('upload-placeholder').classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Robust Gemini API Call using user's key and header authentication
+        async function callGemini(systemPrompt, userPrompt, fallbackType = 'buy', retries = 3, delay = 1000) {
+            const apiKey = "AQ.Ab8RN6Jf1hhqA-aBqHYf2DYtNO8h8qLtmOe0pox2_3wAhjzR5A";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`;
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-goog-api-key': apiKey
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error('Network error');
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        return candidate.content.parts[0].text;
+                    }
+                    throw new Error('Invalid structure');
+                } catch (error) {
+                    if (i === retries - 1) {
+                        return getSmartFallback(fallbackType);
+                    }
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        function getSmartFallback(type) {
+            if (type === 'buyRational') {
+                return "這件週邊的精緻度跟本命的直拍一樣無懈可擊！錢錢沒有不見，只是變成你快樂的形狀，買！";
+            } else if (type === 'buyDestiny') {
+                return "✨ 命運骰子顯示：買爆！連 SKZOO 都在對你眨眼，不買對不起自己！";
+            } else if (type === 'gamble') {
+                return "✨ 聖杯 (Yes!)：神明大笑！今天手氣旺到不行，這盒絕對是本命本尊！";
+            } else if (type === 'sign') {
+                return "「 Stay永遠是Stray Kids最強的後盾 ♡ 」";
+            } else if (type === 'delulu') {
+                return "「（輕輕摸頭）今天練習雖然累，但看到台下的你，就覺得一切都值得了。」";
+            } else {
+                return "「只要 Stay 與 Stray Kids 心意相連，世界巡演就在我們身邊。」";
+            }
+        }
+
+        // 1. Buy Decision Maker
+        async function callGeminiBuy(isRational) {
+            const item = document.getElementById('buy-item').value.trim() || "神仙週邊";
+            const price = document.getElementById('buy-price').value.trim() || "888";
+            const resDiv = document.getElementById('buy-result');
+            
+            resDiv.classList.remove('hidden');
+            resDiv.innerHTML = `<div class="flex items-center justify-center space-x-2 py-2 text-skz-primary"><div class="loader"></div><span>✨ 神諭正在解析中...</span></div>`;
+
+            const systemPrompt = isRational 
+                ? "你是一個幽默、懂追星梗的迷妹財務顧問。請用繁體中文給出犀利且幽默的理性分析，語氣輕鬆可愛，字數在 80 字以內。"
+                : "你是一個神準的迷妹命運之神。請用繁體中文給出直覺且充滿綜藝感的判決，語氣可愛，字數在 60 字以內。";
+
+            const userPrompt = `我想買 "${item}"，價格是 ${price} 台幣。請給我建議。`;
+            const text = await callGemini(systemPrompt, userPrompt, isRational ? 'buyRational' : 'buyDestiny');
+            
+            const title = isRational ? "🧠 理性分析：" : "🎲 命運指引：";
+            const color = isRational ? "text-skz-primary" : "text-skz-pink";
+            resDiv.innerHTML = `<strong class="${color}">${title}</strong><p class="mt-0.5 text-skz-text font-medium">${text}</p>`;
+        }
+
+        // 2. Gambler Oracle
+        async function callGeminiGamble() {
+            const q = document.getElementById('gamble-q').value.trim() || "盲盒能不能抽中本命？";
+            const resDiv = document.getElementById('gamble-result');
+            const divineBox = document.getElementById('divine-box');
+            
+            divineBox.innerHTML = "🏺💥🌪️";
+            resDiv.classList.add('hidden');
+
+            const systemPrompt = "你是一個迷妹盲盒抽卡神明。請用繁體中文給出擲筊結果（聖杯、笑杯或陰杯），並附帶搞笑、貼切且帶有飯圈梗的解讀，總字數 80 字以內。";
+            const userPrompt = `我的問題是：${q}`;
+
+            const text = await callGemini(systemPrompt, userPrompt, 'gamble');
+            setTimeout(() => {
+                divineBox.innerHTML = "🪵✨🏺";
+                resDiv.classList.remove('hidden');
+                resDiv.innerHTML = `<p class="mt-0.5 text-skz-text font-medium leading-relaxed">${text}</p>`;
+            }, 400);
+        }
+
+        // 3. Fan Sign Generator
+        async function callGeminiSign() {
+            const member = document.getElementById('sign-member').value;
+            const display = document.getElementById('sign-display');
+            
+            display.innerHTML = `<div class="flex items-center space-x-2 text-skz-secondary"><div class="loader"></div><span>靈感接收中...</span></div>`;
+
+            const systemPrompt = "你是一個演唱會應援牌專家。請根據使用者指定的成員，用繁體中文生成一句適合寫在應援牌上、創意十足、幽默且能讓偶像一眼看到的金句。只輸出金句內容本身（加上引號）。";
+            const userPrompt = `指定成員：${member}`;
+
+            const text = await callGemini(systemPrompt, userPrompt, 'sign');
+            display.innerText = text;
+        }
+
+        // 4. Delulu Generator
+        async function callGeminiDelulu() {
+            const member = document.getElementById('delulu-member').value;
+            const scenario = document.getElementById('delulu-scenario').value.trim() || "日常寵溺";
+            const resDiv = document.getElementById('delulu-result');
+            
+            resDiv.classList.add('hidden');
+            resDiv.innerHTML = `<div class="flex items-center justify-center space-x-2 py-2 text-pink-500"><div class="loader"></div><span>心跳加速中...</span></div>`;
+
+            const systemPrompt = "你是一個溫柔寵粉的 Stray Kids 成員。請根據指定的成員與情境，用繁體中文寫出一句讓人心動、充滿粉紅泡泡的寵溺情話，字數 80 字以內。";
+            const userPrompt = `成員：${member}，情境：${scenario}`;
+
+            const text = await callGemini(systemPrompt, userPrompt, 'delulu');
+            resDiv.classList.remove('hidden');
+            resDiv.innerHTML = `<strong class="text-pink-500">💌 來自 ${member} 的心動私語：</strong><p class="mt-0.5 font-medium text-skz-text">${text}</p>`;
+        }
+
+        // 5. Daily Quote Loader
+        async function loadDailyQuote() {
+            const quoteEl = document.getElementById('daily-quote');
+            const text = await callGemini("你是一個充滿熱情的 Stay。請用繁體中文寫一句溫馨且充滿追星正能量的金句，字數 40 字以內，加上引號。", "生成今日迷妹金句", 'quote');
+            quoteEl.innerText = text;
+        }
+    </script>
+</body>
+</html>
+```
