@@ -54,7 +54,7 @@
                 <i class="fa-solid fa-gear text-sm"></i>
             </button>
             <div id="ai-status-badge" class="text-[10px] text-skz-muted font-medium bg-skz-bg px-2 py-0.5 rounded-full border border-skz-border flex items-center gap-1">
-                <span id="status-dot" class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> <span id="status-text">迷妹模式</span>
+                <span id="status-dot" class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> <span id="status-text">一般迷妹模式</span>
             </div>
         </div>
     </header>
@@ -67,9 +67,9 @@
                 <button onclick="toggleSettings()" class="text-skz-muted hover:text-skz-text"><i class="fa-solid fa-xmark text-sm"></i></button>
             </div>
             <p class="text-[11px] text-skz-muted leading-relaxed">
-                請輸入您的Google AI Studio金鑰，以開啟瘋狂迷妹模式（<code class="text-skz-primary font-bold">AIzaSy...</code>）。若連線受阻，將恢復一般迷妹模式！
+                請輸入您的Google AI Studio金鑰，開啟瘋狂迷妹模式（<code class="text-skz-primary font-bold">AIzaSy...</code>）。若連線受阻，將恢復一般迷妹模式！
             </p>
-            <input type="password" id="api-key-input" placeholder="貼上 AIzaSy... 金鑰" class="soft-input w-full">
+            <input type="password" id="api-key-input" placeholder="貼上API金鑰" class="soft-input w-full">
             <div class="flex space-x-2 pt-1">
                 <button onclick="saveApiKey()" class="soft-btn flex-1 bg-skz-primary text-white py-2 font-bold rounded-xl cursor-pointer">儲存金鑰</button>
                 <button onclick="clearApiKey()" class="soft-btn bg-skz-bg text-skz-muted border border-skz-border px-3 py-2 font-bold rounded-xl cursor-pointer">清除</button>
@@ -217,7 +217,7 @@
         function clearApiKey() {
             localStorage.removeItem('skz_gemini_key');
             document.getElementById('api-key-input').value = '';
-            alert('已清除 API 金鑰，將切回內建題庫模式。');
+            alert('已清除API金鑰，將恢復一般迷妹模式。');
             toggleSettings();
             checkApiKeyStatus();
         }
@@ -231,7 +231,7 @@
                 text.innerText = "Gemini線上";
             } else {
                 dot.className = "w-2 h-2 rounded-full bg-amber-500 inline-block";
-                text.innerText = "內建庫模式";
+                text.innerText = "一般迷妹模式";
             }
         }
 
@@ -386,7 +386,7 @@
                         return text;
                     }
                 } catch (err) {
-                    console.warn("線上 AI 呼叫失敗，切回內建庫:", err);
+                    console.warn("呼叫瘋狂迷妹失敗，一般迷妹模式:", err);
                 }
             }
 
