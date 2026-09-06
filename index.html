@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>skz-ooholic STAY神諭所</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Noto Sans TC"', 'sans-serif'] },
+                    colors: {
+                        skz: {
+                            bg: '#FBF9F5', card: '#FFFDF9', primary: '#C88A58',
+                            secondary: '#FBD96D', pink: '#F08AB3', text: '#5C4B43',
+                            muted: '#A68A78', border: '#EADBC8'
+                        }
+                    },
+                    boxShadow: { 'soft': '0 4px 16px -4px rgba(184, 134, 93, 0.1)' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FBF9F5;
+            background-image: radial-gradient(#EADBC8 0.7px, transparent 0.7px), radial-gradient(#F3D5C0 0.7px, #FBF9F5 0.7px);
+            background-size: 28px 28px; background-position: 0 0, 14px 14px;
+            color: #5C4B43; -webkit-tap-highlight-color: transparent;
+        }
+        .soft-card { background: rgba(255, 253, 250, 0.95); backdrop-filter: blur(8px); border: 1px solid rgba(184, 134, 93, 0.2); border-radius: 16px; }
+        .soft-btn { transition: all 0.15s ease; box-shadow: 0 3px 10px rgba(184, 134, 93, 0.12); }
+        .soft-btn:hover { transform: translateY(-1px); }
+        .soft-input { background: #FFF; border: 1.5px solid #E6D5C3; border-radius: 10px; padding: 7px 10px; outline: none; font-size: 12px; color: #5C4B43; }
+        .tab-indicator { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .loader { border: 2px solid #EADBC8; border-top: 2px solid #C88A58; border-radius: 50%; width: 16px; height: 16px; animation: spin 0.8s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen pb-8 flex flex-col items-center text-xs">
+
+    <header class="w-full max-w-md bg-white/90 backdrop-blur-md border-b border-skz-border py-2 px-3.5 sticky top-0 z-50 flex items-center justify-between shadow-xs">
+        <div class="flex items-center space-x-1.5">
+            <span class="bg-skz-pink text-white text-[10px] px-2 py-0.5 rounded-full font-bold">SKZ·SKZOO</span>
+            <h1 class="text-xs font-black tracking-wider text-skz-text">skz-ooholic</h1>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="toggleSettings()" class="text-skz-muted hover:text-skz-primary p-1 cursor-pointer transition-colors" title="設定 API 金鑰">
+                <i class="fa-solid fa-gear text-sm"></i>
+            </button>
+            <div id="ai-status-badge" class="text-[10px] text-skz-muted font-medium bg-skz-bg px-2 py-0.5 rounded-full border border-skz-border flex items-center gap-1">
+                <span id="status-dot" class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> <span id="status-text">一般模式</span>
+            </div>
+        </div>
+    </header>
+
+    <div id="settings-modal" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="soft-card w-full max-w-xs p-4 space-y-3 bg-white shadow-xl">
+            <div class="flex items-center justify-between border-b border-skz-border pb-2">
+                <h3 class="font-bold text-skz-text flex items-center gap-1.5"><i class="fa-solid fa-key text-skz-primary"></i> API 金鑰設定 (支援 AQ. / AIzaSy)</h3>
+                <button onclick="toggleSettings()" class="text-skz-muted hover:text-skz-text"><i class="fa-solid fa-xmark text-sm"></i></button>
+            </div>
+            <p class="text-[11px] text-skz-muted leading-relaxed">
+                貼上你的 API 金鑰，立刻開啟瘋狂迷妹 AI 模式！
+            </p>
+            <input type="password" id="api-key-input" placeholder="貼上金鑰" class="soft-input w-full">
+            <div class="flex space-x-2 pt-1">
+                <button onclick="saveApiKey()" class="soft-btn flex-1 bg-skz-primary text-white py-2 font-bold rounded-xl cursor-pointer">儲存金鑰</button>
+                <button onclick="clearApiKey()" class="soft-btn bg-skz-bg text-skz-muted border border-skz-border px-3 py-2 font-bold rounded-xl cursor-pointer">清除</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="w-full max-w-md px-3.5 mt-2.5 flex-1 flex flex-col space-y-2.5">
+
+        <div class="soft-card overflow-hidden relative shadow-soft cursor-pointer group" onclick="document.getElementById('header-banner-file').click()">
+            <div class="relative h-32 w-full bg-[#FAF3E3] flex items-center justify-center border-b border-skz-border">
+                <img id="banner-img" src="" class="w-full h-full object-cover hidden" alt="我的幸運符">
+                <div id="banner-placeholder" class="flex flex-col items-center justify-center space-y-1 text-skz-primary p-4 text-center">
+                    <i class="fa-solid fa-image text-xl mb-0.5"></i>
+                    <span class="font-bold text-xs">點擊上傳你的圖片當封面</span>
+                </div>
+            </div>
+            <input type="file" id="header-banner-file" accept="image/*" class="hidden" onchange="previewBannerImage(event)">
+        </div>
+
+        <div class="relative bg-skz-border/70 p-0.5 rounded-xl flex items-center justify-between shadow-inner">
+            <div id="active-tab-bg" class="absolute top-0.5 bottom-0.5 w-[18%] bg-white rounded-lg shadow-xs tab-indicator"></div>
+            <button onclick="switchTab('buy')" id="btn-buy" class="tab-btn relative z-10 flex-1 py-1.5 font-bold text-skz-text flex flex-col items-center justify-center cursor-pointer"><i class="fa-solid fa-bag-shopping mb-0.5 text-[11px] text-skz-primary"></i><span class="text-[10px]">剁手</span></button>
+            <button onclick="switchTab('gamble')" id="btn-gamble" class="tab-btn relative z-10 flex-1 py-1.5 font-bold text-skz-muted flex flex-col items-center justify-center cursor-pointer"><i class="fa-solid fa-dice mb-0.5 text-[11px] text-skz-pink"></i><span class="text-[10px]">賭徒</span></button>
+            <button onclick="switchTab('sign')" id="btn-sign" class="tab-btn relative z-10 flex-1 py-1.5 font-bold text-skz-muted flex flex-col items-center justify-center cursor-pointer"><i class="fa-solid fa-signs-post mb-0.5 text-[11px] text-amber-600"></i><span class="text-[10px]">飯撒</span></button>
+            <button onclick="switchTab('delulu')" id="btn-delulu" class="tab-btn relative z-10 flex-1 py-1.5 font-bold text-skz-muted flex flex-col items-center justify-center cursor-pointer"><i class="fa-solid fa-wand-magic-sparkles mb-0.5 text-[11px] text-pink-500"></i><span class="text-[10px]">夢女</span></button>
+            <button onclick="switchTab('toolkit')" id="btn-toolkit" class="tab-btn relative z-10 flex-1 py-1.5 font-bold text-skz-muted flex flex-col items-center justify-center cursor-pointer"><i class="fa-solid fa-toolbox mb-0.5 text-[11px] text-blue-500"></i><span class="text-[10px]">生存</span></button>
+        </div>
+
+        <div id="section-buy" class="tab-section soft-card p-3 space-y-2">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1">
+                <h2 class="font-bold text-skz-text flex items-center gap-1.5"><i class="fa-solid fa-scale-balanced text-skz-primary"></i>不買後悔但一直買要剁手</h2>
+                <span class="text-[10px] text-skz-muted">支援週邊圖，迷妹幫你分析</span>
+            </div>
+            <div class="space-y-2">
+                <div onclick="document.getElementById('buy-file').click()" class="border-2 border-dashed border-[#E6D5C3] hover:border-skz-primary bg-white/60 rounded-xl p-2 text-center cursor-pointer transition relative overflow-hidden h-14 flex items-center justify-center">
+                    <div id="upload-placeholder" class="flex items-center space-x-1.5 text-skz-muted">
+                        <i class="fa-solid fa-cloud-arrow-up text-xs text-skz-primary"></i>
+                        <span class="font-medium text-[11px]">上傳週邊截圖/照片</span>
+                    </div>
+                    <img id="buy-preview" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl" alt="預覽">
+                    <input type="file" id="buy-file" accept="image/*" class="hidden" onchange="previewBuyImage(event)">
+                </div>
+
+                <input type="text" id="buy-item" placeholder="輸入週邊名稱（例如：SKZOO 娃娃、小卡）" class="soft-input w-full">
+                <input type="number" id="buy-price" placeholder="輸入價格 NTD" class="soft-input w-full">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="runDecision('rational')" class="soft-btn bg-white border border-skz-primary/40 text-skz-primary py-2 font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1"><i class="fa-solid fa-brain"></i> 理性分析</button>
+                <button onclick="runDecision('destiny')" class="soft-btn bg-skz-pink text-white py-2 font-bold rounded-xl cursor-pointer flex items-center justify-center gap-1"><i class="fa-solid fa-dice"></i> 命運決定</button>
+            </div>
+            <div id="buy-result" class="hidden mt-1.5 p-2.5 bg-white/90 border border-skz-primary/20 rounded-xl space-y-1 shadow-xs"></div>
+        </div>
+
+        <div id="section-gamble" class="tab-section soft-card p-3 space-y-2 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1">
+                <h2 class="font-bold text-skz-text flex items-center gap-1.5"><i class="fa-solid fa-dice-five text-skz-pink"></i> SKZ-OO賭徒</h2>
+                <span class="text-[10px] text-skz-muted">STAY是賭徒</span>
+            </div>
+            <input type="text" id="gamble-q" placeholder="例如：吉鬆會來嗎？" class="soft-input w-full">
+            <div class="text-center py-1 bg-white/50 rounded-xl p-2 border border-skz-border">
+                <div id="divine-box" class="text-2xl mb-1">🤎🐿🤎</div>
+                <button onclick="runGamble()" class="soft-btn bg-skz-secondary text-skz-text px-3.5 py-1.5 font-bold rounded-xl cursor-pointer inline-flex items-center gap-1"><i class="fa-solid fa-hand-holding-heart"></i> 誠心擲筊求神</button>
+            </div>
+            <div id="gamble-result" class="hidden p-2.5 bg-white/90 border border-skz-pink/30 rounded-xl space-y-1 text-center shadow-xs"></div>
+        </div>
+
+        <div id="section-sign" class="tab-section soft-card p-3 space-y-2 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1">
+                <h2 class="font-bold text-skz-text flex items-center gap-1.5"><i class="fa-solid fa-signs-post text-amber-600"></i> 飯撒應援金句</h2>
+            </div>
+            <div class="flex gap-2">
+                <select id="sign-member" class="soft-input flex-1">
+                    <option value="全體">全體成員 (SKZ)</option>
+                    <option value="燦">方燦</option><option value="旻">李旻浩</option><option value="彬">徐彰彬</option>
+                    <option value="辰">黃鉉辰</option><option value="城">韓知城</option><option value="菲">李龍馥</option>
+                    <option value="玟">金昇玟</option><option value="寅">梁精寅</option>
+                </select>
+                <button onclick="runSign()" class="soft-btn bg-skz-primary text-white px-3 py-1.5 font-bold rounded-xl cursor-pointer">靈感生成</button>
+            </div>
+            <div id="sign-display" class="p-3 bg-[#2C2421] text-skz-secondary font-bold text-center rounded-xl border border-skz-primary/30 min-h-[60px] flex items-center justify-center leading-relaxed">
+                點擊上方按鈕，飯撒寫這個！
+            </div>
+        </div>
+
+        <div id="section-delulu" class="tab-section soft-card p-3 space-y-2 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1">
+                <h2 class="font-bold text-skz-text flex items-center gap-1.5"><i class="fa-solid fa-wand-magic-sparkles text-pink-500"></i> 夢女心動小劇場</h2>
+            </div>
+            <select id="delulu-member" class="soft-input w-full">
+                <option value="燦">方燦 (溫柔狼隊長)</option><option value="旻">李旻浩 (傲嬌貓咪)</option>
+                <option value="彬">徐彰彬 (大力士)</option><option value="辰">黃鉉辰 (藝術家男友)</option>
+                <option value="城">韓知城 (圓滾臉頰闊卡)</option><option value="菲">李龍馥 (低音大男孩)</option>
+                <option value="玟">金昇玟 (深情狗狗)</option><option value="寅">梁精寅 (狐狸忙內)</option>
+            </select>
+            <input type="text" id="delulu-scenario" placeholder="互動情境（例如：演唱會對視、後台摸頭）" class="soft-input w-full">
+            <button onclick="runDelulu()" class="soft-btn bg-skz-pink text-white w-full py-2 font-bold rounded-xl cursor-pointer"><i class="fa-solid fa-heart"></i> 心動暴擊</button>
+            <div id="delulu-result" class="hidden p-2.5 bg-white/90 border border-skz-pink/30 rounded-xl space-y-1 shadow-xs"></div>
+        </div>
+
+        <div id="section-toolkit" class="tab-section soft-card p-3 space-y-2 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1">
+                <h2 class="font-bold text-skz-text flex items-center gap-1.5"><i class="fa-solid fa-toolbox text-blue-500"></i> 生存檢查清單</h2>
+            </div>
+            <div class="space-y-1.5 bg-white/70 p-2.5 rounded-xl border border-skz-border">
+                <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" class="accent-skz-primary"><span>手燈電池換新並測試藍牙？</span></label>
+                <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" class="accent-skz-primary"><span>門票、身分證與錢包帶了沒？</span></label>
+                <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" class="accent-skz-primary"><span>應援手幅、小卡保護套準備好？</span></label>
+            </div>
+            <div class="p-2 bg-[#F7F1E5] border border-skz-border rounded-xl text-center">
+                <div class="font-bold mb-0.5 text-skz-primary">🔥 迷妹每日金句</div>
+                <p id="daily-quote" class="text-[11px] text-skz-muted">載入中...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let uploadedBuyImageBase64 = null;
+        let uploadedBuyImageMime = null;
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.replace('text-skz-text', 'text-skz-muted'));
+            document.getElementById('section-' + tabId).classList.remove('hidden');
+            const tabs = ['buy', 'gamble', 'sign', 'delulu', 'toolkit'];
+            const index = tabs.indexOf(tabId);
+            const indicator = document.getElementById('active-tab-bg');
+            indicator.style.left = `calc(${index * 20}% + 2px)`;
+            indicator.style.width = `calc(20% - 4px)`;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            switchTab('buy');
+            loadDailyQuote();
+            checkApiKeyStatus();
+        });
+
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.toggle('hidden');
+            const saved = localStorage.getItem('skz_gemini_key') || '';
+            document.getElementById('api-key-input').value = saved;
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            if (key) {
+                localStorage.setItem('skz_gemini_key', key);
+                alert('API 金鑰已成功儲存！');
+                toggleSettings();
+                checkApiKeyStatus();
+            } else {
+                alert('請輸入有效的金鑰！');
+            }
+        }
+
+        function clearApiKey() {
+            localStorage.removeItem('skz_gemini_key');
+            document.getElementById('api-key-input').value = '';
+            alert('已清除 API 金鑰。');
+            toggleSettings();
+            checkApiKeyStatus();
+        }
+
+        function checkApiKeyStatus() {
+            const key = localStorage.getItem('skz_gemini_key');
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            if (key) {
+                dot.className = "w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse";
+                text.innerText = "瘋狂迷妹模式";
+            } else {
+                dot.className = "w-2 h-2 rounded-full bg-amber-500 inline-block";
+                text.innerText = "一般模式";
+            }
+        }
+
+        function previewBannerImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('banner-img');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    document.getElementById('banner-placeholder').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewBuyImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('buy-preview');
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    document.getElementById('upload-placeholder').classList.add('hidden');
+                    
+                    uploadedBuyImageBase64 = e.target.result.split(',')[1];
+                    uploadedBuyImageMime = file.type;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 絕對穩定優先呼叫 AI 引擎 (修正括號語法，支援 AQ. 與 AIzaSy)
+        async function callAI(systemPrompt, userPrompt, hasImage = false) {
+            const apiKey = localStorage.getItem('skz_gemini_key') || "";
+            
+            if (!apiKey) {
+                throw new Error("尚未設定 API 金鑰！請點擊右上角齒輪輸入金鑰。");
+            }
+
+            let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+            let headers = { 'Content-Type': 'application/json' };
+
+            if (apiKey.startsWith('AQ.')) {
+                headers['Authorization'] = `Bearer ${apiKey}`;
+            } else {
+                apiUrl += `?key=${apiKey}`;
+            }
+            
+            let parts = [{ text: userPrompt }];
+            if (hasImage && uploadedBuyImageBase64 && uploadedBuyImageMime) {
+                parts.push({
+                    inlineData: {
+                        mimeType: uploadedBuyImageMime,
+                        data: uploadedBuyImageBase64
+                    }
+                });
+            }
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    contents: [{ parts: parts }],
+                    systemInstruction: { parts: [{ text: systemPrompt + " (絕對不准承認自己是AI或機器人，必須全程使用資深迷妹STAY口吻與飯圈用語)" }] },
+                    generationConfig: { temperature: 0.75, maxOutputTokens: 350 }
+                })
+            });
+
+            if (!response.ok) {
+                const errJson = await response.json().catch(() => ({}));
+                throw new Error(errJson.error?.message || `連線失敗 (HTTP 狀態碼: ${response.status})`);
+            }
+
+            const result = await response.json();
+            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) {
+                throw new Error("AI 沒有回傳任何內容，請重試！");
+            }
+            return text;
+        }
+
+        async function runDecision(type) {
+            const item = document.getElementById('buy-item').value.trim() || "神仙週邊";
+            const price = document.getElementById('buy-price').value.trim() || "888";
+            const resDiv = document.getElementById('buy-result');
+            
+            resDiv.classList.remove('hidden');
+            resDiv.innerHTML = `<div class="flex items-center justify-center space-x-2 py-2 text-skz-primary"><div class="loader"></div><span>✨ AI 正在瘋狂分析中...</span></div>`;
+
+            const sysPrompt = type === 'rational' 
+                ? "你是一個追星腦拉滿、為Stray Kids發瘋到極點的資深STAY。絕對不要說自己是AI或機器人。請根據使用者輸入的週邊名稱、價格與上傳圖片，用繁體中文夾雜大量飯圈用語（如本命、直拍、回歸、歐氣、神仙、絕版、買爆）與豐富顏文字，給出『表面理性、實則瘋狂勸敗』的精闢分析。字數在 120 字左右。"
+                : "你是一個掌管SKZOO宇宙的迷妹命運之神（絕對不准說自己是AI）。請根據使用者輸入的週邊名稱、價格與上傳圖片，給出充滿綜藝感、超浮誇的宇宙鐵票判決，字數在 120 字左右。";
+
+            try {
+                const text = await callAI(sysPrompt, `我想買的週邊是：${item}，價格是：${price} 台幣。`, true);
+                const title = type === 'rational' ? "🧠 神明理性勸敗指引：" : "🎲 宇宙級命運鐵票判決：";
+                const color = type === 'rational' ? "text-skz-primary" : "text-skz-pink";
+                resDiv.innerHTML = `<strong class="${color}">${title}</strong><p class="mt-0.5 text-skz-text font-medium leading-relaxed">${text}</p>`;
+            } catch (err) {
+                resDiv.innerHTML = `<strong class="text-red-500">❌ AI 連線失敗：</strong><p class="mt-0.5 text-red-600 font-medium">${err.message}</p>`;
+            }
+        }
+
+        async function runGamble() {
+            const q = document.getElementById('gamble-q').value.trim() || "盲盒能不能抽中本命？";
+            const resDiv = document.getElementById('gamble-result');
+            const divineBox = document.getElementById('divine-box');
+            
+            divineBox.innerHTML = "🏺💥🌪️";
+            resDiv.classList.add('hidden');
+
+            const sysPrompt = "你是一個調皮的SKZOO抽卡神明（絕對不准說自己是AI）。請針對使用者提出的具體問題，給出聖杯、笑杯或陰杯結果，並附上超級搞笑、充滿飯圈迷妹迷弟梗的深度解讀，字數在 120 字左右。";
+
+            try {
+                const rawText = await callAI(sysPrompt, `信徒的問題是：${q}`);
+                setTimeout(() => {
+                    divineBox.innerHTML = "🪵✨🏺";
+                    resDiv.classList.remove('hidden');
+                    resDiv.innerHTML = `<p class="mt-1 leading-relaxed">${rawText}</p>`;
+                }, 300);
+            } catch (err) {
+                divineBox.innerHTML = "🪵✨🏺";
+                resDiv.classList.remove('hidden');
+                resDiv.innerHTML = `<p class="text-red-500 font-bold">❌ 抽卡神明連線失敗：${err.message}</p>`;
+            }
+        }
+
+        async function runSign() {
+            const member = document.getElementById('sign-member').value;
+            const display = document.getElementById('sign-display');
+            display.innerHTML = `<div class="flex items-center space-x-2 text-skz-secondary"><div class="loader"></div><span>腦電波正在與寶貝同步中...</span></div>`;
+            
+            try {
+                const text = await callAI("你是一個演唱會應援牌神仙（絕對不准說自己是AI）。請針對使用者指定的特定成員，生成一句讓偶像在舞台上一眼看到會笑出來、超級吸睛的繁體中文應援金句，35字內。", `指定成員：${member}`);
+                display.innerText = text;
+            } catch (err) {
+                display.innerText = `❌ 連線失敗: ${err.message}`;
+            }
+        }
+
+        async function runDelulu() {
+            const member = document.getElementById('delulu-member').value;
+            const scenario = document.getElementById('delulu-scenario').value.trim() || "演唱會對視";
+            const resDiv = document.getElementById('delulu-result');
+            resDiv.classList.remove('hidden');
+            resDiv.innerHTML = `<div class="flex items-center justify-center space-x-2 py-2 text-pink-500"><div class="loader"></div><span>心跳加速，小劇場正在傳送中...</span></div>`;
+            
+            try {
+                const text = await callAI("你現在是Stray Kids成員本人（絕對不准說自己是AI或機器人）。請針對使用者輸入的『互動情境』與指定的成員身分，對STAY說一句心跳漏拍、極度寵溺的繁體中文情話，多用溫柔寵溺語氣，字數約 120 字。", `我是成員：${member}，互動情境是：${scenario}`);
+                resDiv.classList.remove('hidden');
+                resDiv.innerHTML = `<strong class="text-pink-500">💌 來自 ${member} 的心動私語：</strong><p class="mt-0.5 font-medium text-skz-text leading-relaxed">「${text}」</p>`;
+            } catch (err) {
+                resDiv.classList.remove('hidden');
+                resDiv.innerHTML = `<strong class="text-red-500">❌ 小劇場連線失敗：</strong><p class="mt-0.5 text-red-600">${err.message}</p>`;
+            }
+        }
+
+        async function loadDailyQuote() {
+            try {
+                const text = await callAI("生成充滿追星正能量、夾雜迷妹用語的金句（絕不說自己是AI）", "生成每日金句");
+                document.getElementById('daily-quote').innerText = text;
+            } catch (err) {
+                document.getElementById('daily-quote').innerText = "「只要 STAY 與 Stray Kids 雙向奔赴，每天都是回歸期 ♡」";
+            }
+        }
+    </script>
+</body>
+</html>
