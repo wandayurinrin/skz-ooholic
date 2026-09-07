@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>skz-ooholic STAY神諭所</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Noto Sans TC"', 'sans-serif'] },
+                    colors: {
+                        skz: {
+                            bg: '#FBF9F5', card: '#FFFDF9', primary: '#C88A58',
+                            secondary: '#FBD96D', pink: '#F08AB3', text: '#5C4B43',
+                            muted: '#A68A78', border: '#EADBC8'
+                        }
+                    },
+                    boxShadow: { 'soft': '0 4px 16px -4px rgba(184, 134, 93, 0.1)' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FBF9F5;
+            background-image: radial-gradient(#EADBC8 0.7px, transparent 0.7px), radial-gradient(#F3D5C0 0.7px, #FBF9F5 0.7px);
+            background-size: 28px 28px; background-position: 0 0, 14px 14px;
+            color: #5C4B43; -webkit-tap-highlight-color: transparent;
+        }
+        .soft-card { background: rgba(255, 253, 250, 0.95); backdrop-filter: blur(8px); border: 1px solid rgba(184, 134, 93, 0.2); border-radius: 16px; }
+        .soft-btn { transition: all 0.15s ease; box-shadow: 0 3px 10px rgba(184, 134, 93, 0.12); }
+        .soft-btn:hover { transform: translateY(-1px); }
+        .soft-input { background: #FFF; border: 1.5px solid #E6D5C3; border-radius: 10px; padding: 10px; outline: none; font-size: 13px; color: #5C4B43; }
+        .tab-indicator { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .loader { border: 2.5px solid #EADBC8; border-top: 2.5px solid #C88A58; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen pb-8 flex flex-col items-center text-xs">
+
+    <header class="w-full max-w-md bg-white/95 backdrop-blur-md border-b border-skz-border py-2.5 px-4 sticky top-0 z-50 flex items-center justify-between shadow-xs">
+        <div class="flex items-center space-x-2">
+            <span class="bg-skz-pink text-white text-[10px] px-2.5 py-0.5 rounded-full font-black tracking-wider shadow-sm">SKZ·SKZOO</span>
+            <h1 class="text-sm font-black tracking-wider text-skz-text">skz-ooholic</h1>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="toggleSettings()" class="text-skz-muted hover:text-skz-primary p-1 cursor-pointer transition-colors" title="連線狀態">
+                <i class="fa-solid fa-satellite-dish text-base"></i>
+            </button>
+            <div id="ai-status-badge" class="text-[11px] text-skz-muted font-bold bg-skz-bg px-2.5 py-1 rounded-full border border-skz-border flex items-center gap-1.5 transition-all duration-300">
+                <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block shadow-sm"></span> 
+                <span id="status-text">一般迷妹模式</span>
+            </div>
+        </div>
+    </header>
+
+    <div id="settings-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity">
+        <div class="soft-card w-full max-w-xs p-5 space-y-4 bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b border-skz-border pb-2.5">
+                <h3 class="font-black text-skz-text text-sm flex items-center gap-2"><i class="fa-solid fa-satellite-dish text-skz-primary"></i> 腦波連線面板</h3>
+                <button onclick="toggleSettings()" class="text-skz-muted hover:text-skz-text text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p id="modal-status-desc" class="text-xs text-skz-muted leading-relaxed font-medium">
+                隨時點擊下方按鈕，重新召喚神級腦波連線，開啟字數爆表、情感滿分的瘋狂迷妹模式！
+            </p>
+            <div class="flex flex-col space-y-2 pt-2">
+                <button onclick="checkConnectionStatus(true)" class="soft-btn bg-skz-primary text-white py-2.5 text-xs font-black rounded-xl cursor-pointer flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bolt"></i> 強制重新喚醒瘋狂迷妹
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="w-full max-w-md px-4 mt-3 flex-1 flex flex-col space-y-3">
+
+        <div class="soft-card overflow-hidden relative shadow-soft cursor-pointer group rounded-2xl" onclick="document.getElementById('header-banner-file').click()">
+            <div class="relative h-36 w-full bg-gradient-to-br from-[#FAF3E3] to-[#F3D5C0] flex items-center justify-center border-b border-skz-border">
+                <img id="banner-img" src="" class="w-full h-full object-cover hidden" alt="我的幸運符">
+                <div id="banner-placeholder" class="flex flex-col items-center justify-center space-y-1.5 text-skz-primary/80 p-4 text-center group-hover:scale-105 transition-transform duration-300">
+                    <i class="fa-solid fa-image text-2xl mb-1"></i>
+                    <span class="font-bold text-xs tracking-wide">點擊上傳本命美圖當封面 ♡</span>
+                </div>
+            </div>
+            <input type="file" id="header-banner-file" accept="image/*" class="hidden" onchange="previewBannerImage(event)">
+        </div>
+
+        <div class="relative bg-skz-border/60 p-1 rounded-2xl flex items-center justify-between shadow-inner">
+            <div id="active-tab-bg" class="absolute top-1 bottom-1 w-[18%] bg-white rounded-xl shadow-sm tab-indicator"></div>
+            <button onclick="switchTab('buy')" id="btn-buy" class="tab-btn relative z-10 flex-1 py-2 font-black text-skz-text flex flex-col items-center justify-center cursor-pointer transition-colors"><i class="fa-solid fa-bag-shopping mb-1 text-[13px] text-skz-primary"></i><span class="text-[10px]">剁手</span></button>
+            <button onclick="switchTab('gamble')" id="btn-gamble" class="tab-btn relative z-10 flex-1 py-2 font-black text-skz-muted flex flex-col items-center justify-center cursor-pointer transition-colors"><i class="fa-solid fa-dice mb-1 text-[13px] text-skz-pink"></i><span class="text-[10px]">賭徒</span></button>
+            <button onclick="switchTab('sign')" id="btn-sign" class="tab-btn relative z-10 flex-1 py-2 font-black text-skz-muted flex flex-col items-center justify-center cursor-pointer transition-colors"><i class="fa-solid fa-signs-post mb-1 text-[13px] text-amber-600"></i><span class="text-[10px]">飯撒</span></button>
+            <button onclick="switchTab('delulu')" id="btn-delulu" class="tab-btn relative z-10 flex-1 py-2 font-black text-skz-muted flex flex-col items-center justify-center cursor-pointer transition-colors"><i class="fa-solid fa-wand-magic-sparkles mb-1 text-[13px] text-pink-500"></i><span class="text-[10px]">夢女</span></button>
+            <button onclick="switchTab('toolkit')" id="btn-toolkit" class="tab-btn relative z-10 flex-1 py-2 font-black text-skz-muted flex flex-col items-center justify-center cursor-pointer transition-colors"><i class="fa-solid fa-toolbox mb-1 text-[13px] text-blue-500"></i><span class="text-[10px]">生存</span></button>
+        </div>
+
+        <div id="section-buy" class="tab-section soft-card p-4 space-y-3">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1.5">
+                <h2 class="font-black text-skz-text text-[13px] flex items-center gap-1.5"><i class="fa-solid fa-scale-balanced text-skz-primary"></i> 買了後悔三天，不買後悔三年</h2>
+            </div>
+            <div class="space-y-2.5">
+                <div onclick="document.getElementById('buy-file').click()" class="border-2 border-dashed border-[#E6D5C3] hover:border-skz-primary bg-white/50 rounded-xl p-2 text-center cursor-pointer transition-all relative overflow-hidden h-16 flex items-center justify-center group">
+                    <div id="upload-placeholder" class="flex items-center space-x-2 text-skz-muted group-hover:text-skz-primary transition-colors">
+                        <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                        <span class="font-bold text-[11px]">上傳想買的週邊截圖</span>
+                    </div>
+                    <img id="buy-preview" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl" alt="預覽">
+                    <input type="file" id="buy-file" accept="image/*" class="hidden" onchange="previewBuyImage(event)">
+                </div>
+
+                <input type="text" id="buy-item" placeholder="輸入週邊名稱 (如: 演唱會小卡、手燈)" class="soft-input w-full font-medium">
+                <input type="number" id="buy-price" placeholder="價格 (台幣)" class="soft-input w-full font-medium">
+            </div>
+            <div class="grid grid-cols-2 gap-2.5 pt-1">
+                <button onclick="runDecision('rational')" class="soft-btn bg-white border border-skz-primary/50 text-skz-primary py-2.5 text-xs font-black rounded-xl cursor-pointer flex items-center justify-center gap-1.5"><i class="fa-solid fa-brain"></i> 腦波分析</button>
+                <button onclick="runDecision('destiny')" class="soft-btn bg-skz-pink text-white py-2.5 text-xs font-black rounded-xl cursor-pointer flex items-center justify-center gap-1.5"><i class="fa-solid fa-dice"></i> 命運直覺</button>
+            </div>
+            <div id="buy-result" class="hidden mt-2 p-3.5 bg-white/95 border border-skz-primary/30 rounded-xl shadow-sm leading-relaxed text-[13px] text-skz-text font-medium"></div>
+        </div>
+
+        <div id="section-gamble" class="tab-section soft-card p-4 space-y-3 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1.5">
+                <h2 class="font-black text-skz-text text-[13px] flex items-center gap-1.5"><i class="fa-solid fa-dice-five text-skz-pink"></i> 盲盒賭徒專區</h2>
+            </div>
+            <input type="text" id="gamble-q" placeholder="問神明：這盒拆開會有我老公嗎？" class="soft-input w-full font-medium">
+            <div class="text-center py-2 bg-white/60 rounded-xl p-3 border border-skz-border shadow-inner">
+                <div id="divine-box" class="text-3xl mb-2 filter drop-shadow-sm transition-transform duration-300">🤎🐿🤎</div>
+                <button onclick="runGamble()" class="soft-btn bg-skz-secondary text-skz-text px-4 py-2 text-xs font-black rounded-xl cursor-pointer inline-flex items-center gap-1.5"><i class="fa-solid fa-hand-holding-heart"></i> 誠心擲筊求神</button>
+            </div>
+            <div id="gamble-result" class="hidden mt-2 p-3.5 bg-white/95 border border-skz-pink/40 rounded-xl text-center shadow-sm leading-relaxed text-[13px] font-medium text-skz-text"></div>
+        </div>
+
+        <div id="section-sign" class="tab-section soft-card p-4 space-y-3 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1.5">
+                <h2 class="font-black text-skz-text text-[13px] flex items-center gap-1.5"><i class="fa-solid fa-signs-post text-amber-600"></i> 神仙級飯撒應援板</h2>
+            </div>
+            <div class="flex gap-2">
+                <select id="sign-member" class="soft-input flex-1 font-bold">
+                    <option value="全體">全體成員 (SKZ)</option>
+                    <option value="燦">方燦 (Bang Chan)</option><option value="旻">李旻浩 (Lee Know)</option>
+                    <option value="彬">徐彰彬 (Changbin)</option><option value="辰">黃鉉辰 (Hyunjin)</option>
+                    <option value="城">韓知城 (Han)</option><option value="菲">李龍馥 (Felix)</option>
+                    <option value="玟">金昇玟 (Seungmin)</option><option value="寅">梁精寅 (I.N)</option>
+                </select>
+                <button onclick="runSign()" class="soft-btn bg-skz-primary text-white px-3.5 py-2 text-xs font-black rounded-xl cursor-pointer">求靈感</button>
+            </div>
+            <div id="sign-display" class="p-4 bg-[#2C2421] text-skz-secondary font-bold text-left rounded-xl border-2 border-skz-primary/50 min-h-[90px] flex items-center justify-center leading-relaxed text-[13px] shadow-inner">
+                點擊按鈕，幫你生出讓他秒對你笑的超強金句！
+            </div>
+        </div>
+
+        <div id="section-delulu" class="tab-section soft-card p-4 space-y-3 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1.5">
+                <h2 class="font-black text-skz-text text-[13px] flex items-center gap-1.5"><i class="fa-solid fa-wand-magic-sparkles text-pink-500"></i> 夢女專屬心動劇場</h2>
+            </div>
+            <select id="delulu-member" class="soft-input w-full font-bold">
+                <option value="燦">方燦 (溫柔狼隊長)</option><option value="旻">李旻浩 (傲嬌貓咪)</option>
+                <option value="彬">徐彰彬 (反差萌大力士)</option><option value="辰">黃鉉辰 (感性藝術家)</option>
+                <option value="城">韓知城 (圓臉頰闊卡)</option><option value="菲">李龍馥 (低音天使大男孩)</option>
+                <option value="玟">金昇玟 (深情腹黑狗狗)</option><option value="寅">梁精寅 (調皮狐狸忙內)</option>
+            </select>
+            <input type="text" id="delulu-scenario" placeholder="輸入情境（如：簽售會十指緊扣、演唱會對視）" class="soft-input w-full font-medium">
+            <button onclick="runDelulu()" class="soft-btn bg-gradient-to-r from-skz-pink to-pink-400 text-white w-full py-2.5 text-xs font-black rounded-xl cursor-pointer shadow-md"><i class="fa-solid fa-heart"></i> 啟動心動暴擊</button>
+            <div id="delulu-result" class="hidden mt-2 p-3.5 bg-white/95 border-l-4 border-skz-pink rounded-r-xl shadow-sm leading-relaxed text-[13px] font-medium text-skz-text"></div>
+        </div>
+
+        <div id="section-toolkit" class="tab-section soft-card p-4 space-y-3 hidden">
+            <div class="flex items-center justify-between border-b border-skz-border pb-1.5">
+                <h2 class="font-black text-skz-text text-[13px] flex items-center gap-1.5"><i class="fa-solid fa-toolbox text-blue-500"></i> 演唱會生存檢查表</h2>
+            </div>
+            <div class="space-y-2 bg-white/80 p-3 rounded-xl border border-skz-border">
+                <label class="flex items-center space-x-2.5 cursor-pointer font-medium"><input type="checkbox" class="accent-skz-primary w-4 h-4"><span>手燈裝好新電池並測試藍牙了沒？</span></label>
+                <label class="flex items-center space-x-2.5 cursor-pointer font-medium"><input type="checkbox" class="accent-skz-primary w-4 h-4"><span>神聖的門票、身分證與魔法小卡帶了沒？</span></label>
+                <label class="flex items-center space-x-2.5 cursor-pointer font-medium"><input type="checkbox" class="accent-skz-primary w-4 h-4"><span>行動電源充飽電？卡套與痛包整理好沒？</span></label>
+            </div>
+            <div class="p-3 bg-[#F7F1E5] border border-skz-primary/30 rounded-xl text-center shadow-sm">
+                <div class="font-black mb-1.5 text-skz-primary text-xs tracking-wider">🔥 本日 STAY 靈魂喊話</div>
+                <p id="daily-quote" class="text-[12px] text-skz-text font-medium leading-relaxed">正在呼叫宇宙神諭中...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 【核心設定】這就是你要求的全新 3.6-flash 與 AQ 金鑰！
+        const MY_GEMINI_KEY = "AQ.Ab8RN6J4IpaWh2vjFHM7LRfBH6sPTZoggxQSNOq6rh1lqaJvaw";
+        const MODEL_VERSION = "gemini-3.6-flash";
+        
+        let uploadedBuyImageBase64 = null;
+        let uploadedBuyImageMime = null;
+        let isCrazyMode = false;
+
+        // 【超豪華擴寫版神諭庫】如果真的斷線，回覆一樣長度爆表、充滿感情！
+        const massiveDB = {
+            rational: [
+                "天啊姐妹你先冷靜聽我說！我幫你仔細看過了，這件週邊的精緻度根本跟本命的高清直拍一樣神仙好嗎！💸 你的錢錢真的沒有不見，它只是變成了守護你歐氣的完美形狀！你現在如果猶豫不買，等下次回歸它直接絕版，你去日拍社團收絕對會被炒到天價，到時候你會哭暈在廁所裡！聽我的，少喝幾杯奶茶、少吃兩頓大餐這筆錢就生出來了，這買下去人生直接圓滿，快點拿出魔法小卡無情刷下去吧！🥺🔥",
+                "我來幫你進行最嚴格的理性分析：雖然這個價格一開始看會覺得錢包微痛，但這可是能裝下你滿滿愛意的完美神仙配件！想像一下演唱會當天你帶著它去現場，絕對是全場最吸睛、最亮眼的那個 STAY！這種神仙等級的設計，不買絕對對不起每天熬夜刷 MV 衝點閱的自己。這不是衝動購物，這是對信仰的投資！不要猶豫了，立刻結帳把它帶回家供奉起來！✨🤎"
+            ],
+            destiny: [
+                "✨ 來自宇宙最高級別的神諭：命運的齒輪已經為你瘋狂轉動了！連 SKZOO 都在夢裡對你瘋狂眨眼放電了，這就是命中註定屬於你的寶物啊！不要再猶豫了，立刻買下去，你的快樂會直接加倍，本命如果知道你這麼支持他，一定會為你感到驕傲的！卡刷下去就對了！",
+                "🎲 鐵票判決結果出爐：神明在天上大喊一聲「給我買爆」！千金難買心頭好，這種光是看照片就讓你心跳加速的神仙週邊，你猶豫一秒鐘都是對本命顏值的不尊重！直接給他帶回家，立刻、馬上！"
+            ],
+            gamble: [
+                { type: "✨ 聖杯 (絕對大爆死必中)", text: "神明直接在天上大笑出聲！今天你的手氣簡直是開了掛，歐氣爆棚直接突破大氣層！這盒裡面絕對是你的本命在瘋狂敲門向你招手，不要懷疑，趕快用顫抖的手拆開它，準備尖叫到鄰居抗議吧！🎉🔥" },
+                { type: "🟡 笑杯 (隨緣也是一種美)", text: "🐿️ 神明調皮地對你笑了笑，給了個神秘的眼神：姐妹心態放寬一點啦！得失心不要太重！就算這盒真的沒抽中你的大本命，抽到其他成員的也是超級可愛到不行，小卡背面的隱藏版小愛心絕對穩賺不賠，當作收集福氣啦！" },
+                { type: "⚫ 陰杯 (先捏住錢包)", text: "📡 哎呀！神明狂搖頭警告：今天你身邊的磁場有點不對盤，感覺你的專屬歐氣還在路上塞車！建議先把運氣跟錢包省下來，留到搶下一次演唱會搖滾區門票的時候再一口氣大爆發吧！先忍忍，別衝動！" }
+            ],
+            signs: [
+                "「 就算我在山頂看台，我的愛也跟你的神級高音一樣穿透宇宙！🔥 」\n(神仙點評：超級熱血，保證他在台上看了會感動到笑出來！)",
+                "「 看到這塊牌子的話請馬上對我 WINK！不然我會直接在現場幸福到暈倒給你看！🥺 」\n(神仙點評：帶點可愛的威脅感，偶像最吃這套了，心臟暴擊！)"
+            ],
+            delulu: [
+                "他溫柔地走到你面前，輕輕揉了揉你的頭髮，眼神拉絲、低聲笑著對你說：『今天練習雖然很累，骨頭都要散了，但只要一抬頭看到台下的你，就覺得全世界都亮了，一切都好值得。答應我，永遠不要離開我的視線好嗎？』✨",
+                "他在後台悄悄拉住你的手腕，霸道又輕柔地把你拉進懷裡，下巴靠在你的肩膀上撒嬌：『剛剛在台上真的好緊張，差點就走位錯了，借我充個電好不好？有你在身邊真好，等下結束我們偷偷去吃好吃的吧。』🥺"
+            ],
+            quotes: [
+                "「只要 STAY 與 Stray Kids 雙向奔赴，每天都是最棒的回歸期！今天也要滿血復活，用力愛這八個讓全世界發瘋的男人！♡」",
+                "「我的血管裡流的早就不是血了，是八個男人的神仙舞台直拍與天籟歌聲！STAY 永不言敗，今天也要元氣滿滿地為他們應援！🔥」"
+            ]
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-section').forEach(function(el) { el.classList.add('hidden'); });
+            document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.replace('text-skz-text', 'text-skz-muted'); });
+            document.getElementById('section-' + tabId).classList.remove('hidden');
+            const tabs = ['buy', 'gamble', 'sign', 'delulu', 'toolkit'];
+            const index = tabs.indexOf(tabId);
+            const indicator = document.getElementById('active-tab-bg');
+            indicator.style.left = 'calc(' + (index * 20) + '% + 4px)';
+            indicator.style.width = 'calc(20% - 8px)';
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            switchTab('buy');
+            loadDailyQuote();
+            checkConnectionStatus(false);
+        });
+
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.add('opacity-100'), 10);
+            } else {
+                modal.classList.remove('opacity-100');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+            }
+        }
+
+        async function checkConnectionStatus(showAlert = false) {
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            const desc = document.getElementById('modal-status-desc');
+            
+            if (showAlert) {
+                desc.innerHTML = "✨ 正在點燃迷妹腦波...";
+            }
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_VERSION}:generateContent`;
+            const payload = { contents: [{ parts: [{ text: "ping" }] }] };
+            let success = false;
+            let errorMessage = "";
+
+            try {
+                // 策略 1: 標準 ?key= 參數 (最穩定)
+                let response = await fetch(`${url}?key=${MY_GEMINI_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).catch(() => null);
+
+                // 策略 2: Bearer Token 驗證 (針對特定 AQ 金鑰)
+                if (!response || !response.ok) {
+                    response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${MY_GEMINI_KEY}` },
+                        body: JSON.stringify(payload)
+                    }).catch(() => null);
+                }
+
+                // 策略 3: x-goog-api-key 標頭
+                if (!response || !response.ok) {
+                    response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': MY_GEMINI_KEY },
+                        body: JSON.stringify(payload)
+                    }).catch(() => null);
+                }
+
+                if (response && response.ok) {
+                    success = true;
+                } else if (response) {
+                    const data = await response.json();
+                    errorMessage = data.error?.message || "未知的 Google API 拒絕存取錯誤";
+                } else {
+                    errorMessage = "網路斷線或被瀏覽器阻擋 (CORS)";
+                }
+
+                if (success) {
+                    isCrazyMode = true;
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-green-500 inline-block animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]";
+                    text.innerText = "瘋狂迷妹模式";
+                    text.className = "text-[11px] text-green-600 font-black";
+                    desc.innerHTML = "✨ 瘋狂迷妹已上線！！";
+                    if (showAlert) { alert('✨ 成功重新已進入瘋狂迷妹模式 ♡'); toggleSettings(); }
+                } else {
+                    throw new Error(errorMessage);
+                }
+            } catch (err) {
+                isCrazyMode = false;
+                dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 inline-block shadow-sm";
+                text.innerText = "一般迷妹模式";
+                text.className = "text-[11px] text-skz-muted font-bold";
+                desc.innerHTML = "💛 瘋狂迷妹出走了，切換為一般迷妹模式";
+                if (showAlert) { alert('💛 瘋狂迷妹似乎登出了，已呼叫一般迷妹！'); toggleSettings(); }
+            }
+        }
+
+        function previewBannerImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('banner-img');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    document.getElementById('banner-placeholder').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewBuyImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('buy-preview');
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    document.getElementById('upload-placeholder').classList.add('hidden');
+                    
+                    uploadedBuyImageBase64 = e.target.result.split(',')[1];
+                    uploadedBuyImageMime = file.type;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function callOracleEngine(systemPrompt, userPrompt, category, hasImage = false) {
+            
+            // 強制加上這個極其嚴格的後綴，確保它不會敷衍，且絕對不用 AI 語氣
+            const strictRules = `
+            【絕對指令：你是一個為Stray Kids發瘋的極致資深STAY迷妹！嚴禁在回覆中出現「AI、語言模型、系統、機器人」等任何出戲字眼。
+            回答必須極度熱情、生動、字數必須超過 150 字！請瘋狂使用飯圈用語(如：本命、歐氣、回歸、直拍、買爆、暈船)與海量顏文字(如：🥺, 🔥, ✨, 🤎)。
+            請完全沉浸在瘋狂迷妹的角色裡，不要給出任何死板的清單，要像跟閨蜜瘋狂聊天一樣！】`;
+
+            let parts = [{ text: userPrompt }];
+            if (hasImage && uploadedBuyImageBase64 && uploadedBuyImageMime) {
+                parts.push({
+                    inlineData: { mimeType: uploadedBuyImageMime, data: uploadedBuyImageBase64 }
+                });
+            }
+
+            if (isCrazyMode) {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_VERSION}:generateContent`;
+                const payload = {
+                    contents: [{ role: "user", parts: parts }],
+                    systemInstruction: { parts: [{ text: systemPrompt + strictRules }] },
+                    generationConfig: { temperature: 0.9, maxOutputTokens: 600 }
+                };
+
+                try {
+                    // 同樣採用三引擎保證發送
+                    let response = await fetch(`${url}?key=${MY_GEMINI_KEY}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                    }).catch(() => null);
+
+                    if (!response || !response.ok) {
+                        response = await fetch(url, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${MY_GEMINI_KEY}` }, body: JSON.stringify(payload)
+                        }).catch(() => null);
+                    }
+
+                    if (!response || !response.ok) {
+                        response = await fetch(url, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': MY_GEMINI_KEY }, body: JSON.stringify(payload)
+                        }).catch(() => null);
+                    }
+
+                    if (response && response.ok) {
+                        const result = await response.json();
+                        const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (text) return text.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>'); // 自動換行處理
+                    }
+                } catch (err) {
+                    console.warn('API 呼叫失敗，降級使用內建長篇圖書館...', err);
+                }
+            }
+
+            // 如果離線或連線失敗，直接啟用內建的長篇回覆
+            const pool = massiveDB[category] || massiveDB.quotes;
+            const item = pool[Math.floor(Math.random() * pool.length)];
+            if (category === 'gamble') return `<strong class="text-skz-pink text-sm block mb-1.5">${item.type}</strong><span class="leading-relaxed">${item.text}</span>`;
+            const textResult = typeof item === 'string' ? item : item.text;
+            return textResult.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+        }
+
+        async function runDecision(type) {
+            const item = document.getElementById('buy-item').value.trim() || "夢幻神仙週邊";
+            const price = document.getElementById('buy-price').value.trim() || "999";
+            const resDiv = document.getElementById('buy-result');
+            
+            resDiv.classList.remove('hidden');
+            resDiv.innerHTML = '<div class="flex items-center justify-center space-x-2.5 py-4 text-skz-primary"><div class="loader"></div><span class="font-bold tracking-wider">🔥 瘋狂迷妹腦波正在極速燃燒分析中...</span></div>';
+
+            const sysPrompt = type === 'rational' 
+                ? "請針對使用者想買的週邊給出『表面看似理性、實際上是瘋狂推坑勸敗』的深度長篇分析。"
+                : "請針對使用者想買的週邊，給出充滿綜藝感、極度浮誇且命中註定必須買的『宇宙鐵票判決』。";
+
+            const text = await callOracleEngine(sysPrompt, `姐妹幫我看！我想買的週邊是：${item}，價格是：${price} 台幣。快推坑我！`, type, true);
+            
+            const title = type === 'rational' ? "🧠 神明理性勸敗指引：" : "🎲 宇宙級命運鐵票判決：";
+            const color = type === 'rational' ? "text-skz-primary" : "text-skz-pink";
+            resDiv.innerHTML = `<strong class="${color} block mb-2 text-sm">${title}</strong><div class="mt-1 text-skz-text font-medium leading-relaxed">${text}</div>`;
+        }
+
+        async function runGamble() {
+            const q = document.getElementById('gamble-q').value.trim() || "這盒盲盒抽下去會有我的大本命嗎？";
+            const resDiv = document.getElementById('gamble-result');
+            const divineBox = document.getElementById('divine-box');
+            
+            divineBox.innerHTML = "🏺💥🌪️";
+            resDiv.classList.add('hidden');
+
+            const sysPrompt = "你是一個調皮的抽卡神明。請直接針對信徒的求籤內容給出【聖杯】、【笑杯】或【陰杯】的明確結果，並附上超級搞笑、戲劇化、充滿飯圈梗的長篇深度解讀。";
+            const rawText = await callOracleEngine(sysPrompt, `神明啊請告訴我：${q}`, 'gamble');
+
+            setTimeout(function() {
+                divineBox.innerHTML = "🪵✨🏺";
+                resDiv.classList.remove('hidden');
+                resDiv.innerHTML = `<div class="leading-relaxed">${rawText}</div>`;
+            }, 500);
+        }
+
+        async function runSign() {
+            const member = document.getElementById('sign-member').value;
+            const display = document.getElementById('sign-display');
+            display.innerHTML = '<div class="flex items-center space-x-2 text-skz-secondary w-full justify-center"><div class="loader"></div><span class="font-bold tracking-wider">✨ 腦電波與寶貝強力同步中...</span></div>';
+            
+            const sysPrompt = "請想出2到3句讓該成員在台上看到絕對會笑出來、超級吸睛、充滿反差萌梗的繁體中文應援金句。並用迷妹激動的語氣附上為什麼這句會中！";
+            const text = await callOracleEngine(sysPrompt, `幫我想給「${member}」的超強演唱會應援手幅金句！`, 'signs');
+            display.innerHTML = `<div class="text-left w-full">${text}</div>`;
+        }
+
+        async function runDelulu() {
+            const member = document.getElementById('delulu-member').value;
+            const scenario = document.getElementById('delulu-scenario').value.trim() || "演唱會彩排對視";
+            const resDiv = document.getElementById('delulu-result');
+            
+            resDiv.classList.remove('hidden');
+            resDiv.innerHTML = '<div class="flex items-center justify-center space-x-2.5 py-4 text-pink-500"><div class="loader" style="border-top-color:#F08AB3;"></div><span class="font-bold tracking-wider">💌 心跳加速，專屬小劇場極速傳送中...</span></div>';
+            
+            const sysPrompt = "你現在是Stray Kids的指定成員本人。請根據互動情境，對STAY說一段心跳漏拍、極度寵溺的長篇情話。必須包含極其具體的動作描寫，畫面感十足，讓人瞬間暈船！";
+            const text = await callOracleEngine(sysPrompt, `我是成員：${member}，我們現在的情境是：${scenario}。請對我說情話。`, 'delulu');
+            
+            resDiv.innerHTML = `<strong class="text-pink-500 block mb-2 text-sm">來自 ${member} 的專屬心動私語：</strong><div class="mt-1 font-medium text-skz-text italic leading-relaxed">「${text}」</div>`;
+        }
+
+        async function loadDailyQuote() {
+            document.getElementById('daily-quote').innerHTML = await callOracleEngine("請產出一句熱血、感動、充滿追星正能量與飯圈用語的超長篇每日金句，激勵今天的STAY自己。", "給我一句STAY專屬的長篇每日金句", 'quotes');
+        }
+    </script>
+</body>
+</html>
